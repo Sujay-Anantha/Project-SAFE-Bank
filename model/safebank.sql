@@ -16,6 +16,12 @@ CREATE TABLE ais_acct (
 ALTER TABLE ais_acct
     ADD CONSTRAINT ch_inh_ais_acct CHECK ( acct_type IN ( 'AIS_ACCT', 'C', 'L', 'S' ) );
 
+ALTER TABLE ais_acct
+    ADD CONSTRAINT chk_astatus CHECK (astatus IN ('A', 'I', 'C'));
+    
+ALTER TABLE ais_acct
+ADD CONSTRAINT unique_cust_acct_type UNIQUE (cust_id, acct_type);
+
 ALTER TABLE ais_acct ADD CONSTRAINT ais_acct_pk PRIMARY KEY ( acct_no );
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
