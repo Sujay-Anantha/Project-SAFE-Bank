@@ -22,6 +22,7 @@ ALTER TABLE ais_acct
 ALTER TABLE ais_acct
 ADD CONSTRAINT unique_cust_acct_type UNIQUE (cust_id, acct_type);
 
+
 ALTER TABLE ais_acct ADD CONSTRAINT ais_acct_pk PRIMARY KEY ( acct_no );
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
@@ -126,6 +127,42 @@ CREATE TABLE ais_stud_loan (
     expgrad_year  INT NOT NULL COMMENT 'Expected Graduation Year',
     eid           INT
 );
+
+-- Ensure service charge in AIS_CHECKING is non-negative
+ALTER TABLE AIS_CHECKING 
+ADD CONSTRAINT C_SERVICE_CHARGE CHECK (SERVICE_CHARGE >= 0);
+
+-- Ensure interest rate in AIS_SAVINGS is non-negative
+ALTER TABLE AIS_SAVINGS 
+ADD CONSTRAINT C_INTEREST_RATE CHECK (INTEREST_RATE >= 0);
+
+-- Ensure loan rate in AIS_LOAN is non-negative
+ALTER TABLE AIS_LOAN 
+ADD CONSTRAINT C_LOAN_RATE CHECK (LRATE >= 0);
+
+-- Ensure loan amount in AIS_LOAN is non-negative
+ALTER TABLE AIS_LOAN 
+ADD CONSTRAINT C_LOAN_AMOUNT CHECK (LAMOUNT >= 0);
+
+-- Ensure loan months in AIS_LOAN is non-negative
+ALTER TABLE AIS_LOAN 
+ADD CONSTRAINT C_LOAN_MONTHS CHECK (LMONTHS >= 0);
+
+-- Ensure loan payment in AIS_LOAN is non-negative
+ALTER TABLE AIS_LOAN 
+ADD CONSTRAINT C_LOAN_PAYMENT CHECK (LPAYMENT >= 0);
+
+-- Ensure valid degree values ('U' for Undergraduate, 'G' for Graduate) in AIS_STUD_LOAN
+ALTER TABLE AIS_STUD_LOAN 
+ADD CONSTRAINT C_STUD_DEGREE CHECK (DEGREE IN ('U', 'G'));
+
+-- Ensure expected graduation month in AIS_STUD_LOAN is between 1 and 12
+ALTER TABLE AIS_STUD_LOAN 
+ADD CONSTRAINT C_EXP_GRAD_MON CHECK (EXPGRAD_MONTH BETWEEN 1 AND 12);
+
+-- Ensure yearly premium in AIS_HOME_LOAN is non-negative
+ALTER TABLE AIS_HOME_LOAN 
+ADD CONSTRAINT C_YR_PREMIUM CHECK (YR_PREMIUM >= 0);
 
 
 ALTER TABLE ais_acct MODIFY COLUMN acct_no BIGINT NOT NULL AUTO_INCREMENT;
