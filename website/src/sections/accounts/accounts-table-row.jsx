@@ -1,23 +1,28 @@
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 import PropTypes from 'prop-types';
 
 import Grid from '@mui/material/Grid';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
+import Select from '@mui/material/Select';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 // import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
+import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import FormControl from '@mui/material/FormControl';
 import { Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
-import Label from 'src/components/label';
-import Iconify from 'src/components/iconify';
+import { visuallyHidden } from './utils';
+import Label from '../../components/label';
+import Iconify from '../../components/iconify';
+import accountService from '../../service/accountService';
 
-// import ConfirmBox from '../../components/confirmBox';
 
 // ----------------------------------------------------------------------
 
@@ -59,6 +64,12 @@ export default function AccountsTableRow({
   const closeDeleteMenu = () => {
     setDel(false);
   };
+
+  const handleDelete = (accno) => {
+    // TODO: call API to delete account
+    accountService.deleteAccount(accno);
+    closeDeleteMenu();
+  }
   // const accountEditForm = (
   //   <>
   //     <Stack spacing={3}>
@@ -92,6 +103,30 @@ export default function AccountsTableRow({
   //   </>
   // );
 
+  const isAuthorized = () => {
+    // TODO: get user role
+    if (edit) {
+      return visuallyHidden
+    }
+    return 'none'
+  };
+
+  const [editForm, setEditForm] = useState({ acctype: '', acct_name: '', astreet: '', acity: '', astate: '', azipcode: ''});
+  
+  const handleChange = (e) => {
+    const {name, value} = e.target;
+    setEditForm({ ...editForm, [name]: value });
+  };
+
+  const handleEdit = () => {
+    console.log(editForm);
+    const sanitizedEditForm=DOMPurify.sanitize(editForm);
+    console.log(sanitizedEditForm);
+    // TODO: call API to update account
+    accountService.updateAccountDetails(sanitizedEditForm);
+    closeEditMenu();
+  }
+
   return (
     <>
       {/* <AccountEditForm
@@ -122,11 +157,12 @@ export default function AccountsTableRow({
           <Label color={(status === 'closed' && 'error') || 'success'}>{status}</Label>
         </TableCell>
 
-        <TableCell align="right">
+        <TableCell align="right" sx={isAuthorized}>
           <IconButton onClick={handleOpenMenu}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
+
       </TableRow>
 
       <Popover
@@ -157,21 +193,32 @@ export default function AccountsTableRow({
       >
         <DialogTitle>Edit Account</DialogTitle>
         <DialogContent>
-          <Stack spacing={3}>
-            <TextField name="accountName" label="Account Name" />
-            <TextField name="aStreet" label="Street" />
-            <TextField name="aCity" label="City" />
-            <TextField name="aStatus" label="Status" />
-            <TextField name="accountType" label="Account Type" />
-
+          <Stack spacing={2} paddingTop={2}>
+            <TextField name="acct_name" label="Account Name" value={editForm.acct_name} onChange={handleChange}/>
+            <TextField name="astreet" label="Street" value={editForm.astreet} onChange={handleChange}/>
+            <TextField name="acity" label="City" value={editForm.acity} onChange={handleChange}/>
+            <FormControl sx={{ minWidth: 120 }}>
+              <InputLabel id="roleLabel">Account Type</InputLabel>
+              <Select
+                name="acctype"
+                label="Account Type"
+                // labelId="ac"
+                value={editForm.acctype}
+                onChange={handleChange}
+              >
+                <MenuItem value='checking'>Checking</MenuItem>
+                <MenuItem value='savings'>Savings</MenuItem>
+                <MenuItem value='loan'>Loan</MenuItem>
+              </Select>
+            </FormControl>
           </Stack>
 
           <Grid container justifyContent="flex-end"  sx={{ my: 3 }}>
             <Grid item xs={6}>
-              <TextField name="astate" label="State"/>
+              <TextField name="astate" label="State" value={editForm.astate} onChange={handleChange}/>
             </Grid>
             <Grid item xs={6}>
-              <TextField name="azipcode" label="Zip Code"/>
+              <TextField name="azipcode" label="Zip Code" value={editForm.azipcode} onChange={handleChange}/>
             </Grid>
           </Grid>
         </DialogContent>
@@ -183,7 +230,7 @@ export default function AccountsTableRow({
             type="submit"
             variant="contained"
             color="inherit"
-            onClick={() => closeEditMenu()}
+            onClick={() => handleEdit()}
           >
             Confirm
           </Button>
@@ -219,7 +266,7 @@ export default function AccountsTableRow({
             // type="submit"
             variant="contained"
             color="inherit"
-            onClick={() => closeDeleteMenu()}
+            onClick={() => handleDelete(accNo)}
           >
             Confirm
           </Button>

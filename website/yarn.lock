@@ -490,6 +490,13 @@
   "resolved" "https://registry.npmjs.org/@swc/types/-/types-0.1.5.tgz"
   "version" "0.1.5"
 
+"@types/dompurify@^3.0.5":
+  "integrity" "sha512-1Wg0g3BtQF7sSb27fJQAKck1HECM6zV1EB66j8JH9i3LCjYabJa0FSdiSgsD5K/RbrsR0SiraKacLB+T8ZVYAg=="
+  "resolved" "https://registry.npmjs.org/@types/dompurify/-/dompurify-3.0.5.tgz"
+  "version" "3.0.5"
+  dependencies:
+    "@types/trusted-types" "*"
+
 "@types/json-schema@^7.0.12":
   "integrity" "sha512-RbSSoHliUbnXj3ny0CNFOoxrIDV6SUGyStHsvDqosw6CkdPV8TtWGlfecuK4ToyMEAql6pzNxgCFKanovUzlgQ=="
   "resolved" "https://registry.npmjs.org/@types/json-schema/-/json-schema-7.0.13.tgz"
@@ -552,6 +559,11 @@
   "integrity" "sha512-OxepLK9EuNEIPxWNME+C6WwbRAOOI2o2BaQEGzz5Lu2e4Z5eDnEo+/aVEDMIXywoJitJ7xWd641wrGLZdtwRyw=="
   "resolved" "https://registry.npmjs.org/@types/semver/-/semver-7.5.3.tgz"
   "version" "7.5.3"
+
+"@types/trusted-types@*":
+  "integrity" "sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw=="
+  "resolved" "https://registry.npmjs.org/@types/trusted-types/-/trusted-types-2.0.7.tgz"
+  "version" "2.0.7"
 
 "@typescript-eslint/scope-manager@6.7.4":
   "integrity" "sha512-SdGqSLUPTXAXi7c3Ob7peAGVnmMoGzZ361VswK2Mqf8UOYcODiYvs8rs5ILqEdfvX1lE7wEZbLyELCW+Yrql1A=="
@@ -1124,6 +1136,11 @@
   dependencies:
     "@babel/runtime" "^7.8.7"
     "csstype" "^3.0.2"
+
+"dompurify@^3.1.2":
+  "integrity" "sha512-hLGGBI1tw5N8qTELr3blKjAML/LY4ANxksbS612UiJyDfyf/2D092Pvm+S7pmeTGJRqvlJkFzBoHBQKgQlOQVg=="
+  "resolved" "https://registry.npmjs.org/dompurify/-/dompurify-3.1.2.tgz"
+  "version" "3.1.2"
 
 "emoji-regex@^9.2.2":
   "integrity" "sha512-L18DaJsXSUk2+42pv8mLs5jJT2hqFkFE4j21wOmgbUqsZ2hL72NsUU785g9RXgo3s0ZNgVl42TiHp3ZtOv/Vyg=="

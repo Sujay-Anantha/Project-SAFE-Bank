@@ -5,16 +5,17 @@ import Stack from '@mui/material/Stack';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import { useTheme } from '@mui/material/styles';
-import IconButton from '@mui/material/IconButton';
+// import IconButton from '@mui/material/IconButton';
 
 import { useResponsive } from 'src/hooks/use-responsive';
 
 import { bgBlur } from 'src/theme/css';
 
-import Iconify from 'src/components/iconify';
+// import Iconify from 'src/components/iconify';
 
+import { HEADER } from './config-layout';
 import Searchbar from './common/searchbar';
-import { NAV, HEADER } from './config-layout';
+// import { NAV, HEADER } from './config-layout';
 import AccountPopover from './common/account-popover';
 // import NotificationsPopover from './common/notifications-popover';
 
@@ -27,11 +28,11 @@ export default function Header({ onOpenNav }) {
 
   const renderContent = (
     <>
-      {!lgUp && (
+      {/* {!lgUp && (
         <IconButton onClick={onOpenNav} sx={{ mr: 1 }}>
           <Iconify icon="eva:menu-2-fill" />
         </IconButton>
-      )}
+      )} */}
 
       <Searchbar />
 
@@ -57,7 +58,8 @@ export default function Header({ onOpenNav }) {
           duration: theme.transitions.duration.shorter,
         }),
         ...(lgUp && {
-          width: `calc(100% - ${NAV.WIDTH + 1}px)`,
+          // width: `calc(100% - ${NAV.WIDTH + 1}px)`,
+          width: `calc(100% - ${92}px)`,
           height: HEADER.H_DESKTOP,
         }),
       }}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -42,8 +43,10 @@ export default function LoginView() {
     // if (raw.status === 200 && raw.data.password === password) {
     //   return true;
     // }
-    if (email==="1" && password==="2") {
-      router.push('/');
+    // TODO: call API to check login info is correct
+    
+    if (DOMPurify.sanitize(email)==="1" && DOMPurify.sanitize(password)==="2") {
+      router.push('/accounts');
     }
     else {
       alert("Wrong username or password")
@@ -87,11 +90,11 @@ export default function LoginView() {
         </FormControl>
       </Stack>
 
-      <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
+      {/* <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
         <Link variant="subtitle2" underline="hover">
           Forgot password?
         </Link>
-      </Stack>
+      </Stack> */}
 
       <LoadingButton
         fullWidth
@@ -99,6 +102,7 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
+        sx={{ my: 3 }}
         onClick={() => authentication(loginForm.email, loginForm.password)}
       >
         Login

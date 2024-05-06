@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import DOMPurify from 'dompurify';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -19,25 +20,36 @@ import Iconify from '../../components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function LoginView() {
+export default function SigninView() {
   const theme = useTheme();
 
   const router = useRouter();
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleClick = () => {
-    router.push('/login');
+  const [signinForm, setSigninForm] = useState({ cfname: '', clname: '', cstreet: '', ccity: '', cstate: '', czipcode: '', email: '', password: '', role: ''});
+  
+  const handleChange = (e) => {
+    const {name, value} = e.target;
+    setSigninForm({ ...signinForm, [name]: value });
   };
+
+  const handleSignin = () => {
+    console.log(signinForm);
+    const sanitizedSigninForm=DOMPurify.sanitize(signinForm);
+    console.log(sanitizedSigninForm);
+    // TODO: all api to add customer info to db
+    router.push('/login');
+  }
 
   const renderForm = (
     <>
       <Grid container justifyContent="flex-end" sx={{ my: 3 }}>
         <Grid item xs={4}>
-          <TextField name="firstName" label="First Name" />
+          <TextField name="cfname" label="First Name" value={signinForm.cfname} onChange={handleChange}/>
         </Grid>
         <Grid item xs={4}>
-          <TextField name="lastName" label="Last Name" />
+          <TextField name="clname" label="Last Name" value={signinForm.clname} onChange={handleChange}/>
         </Grid>
         <Grid item xs={4}>
           <FormControl sx={{ minWidth: 180 }}>
@@ -46,8 +58,8 @@ export default function LoginView() {
               name="role"
               label="Role"
               labelId="roleLabel"
-              // value={loginForm.role}
-              // onChange={handleChange}
+              value={signinForm.role}
+              onChange={handleChange}
             >
               <MenuItem value='customer'>Customer</MenuItem>
               <MenuItem value='employee'>Employee</MenuItem>
@@ -57,7 +69,7 @@ export default function LoginView() {
       </Grid>
 
       <Stack spacing={2}  sx={{ my: 3 }}>
-        <TextField name="email" label="Email address" />
+        <TextField name="email" label="Email address" value={signinForm.email} onChange={handleChange}/>
 
         <TextField
           name="password"
@@ -72,32 +84,20 @@ export default function LoginView() {
               </InputAdornment>
             ),
           }}
+          value={signinForm.password}
+          onChange={handleChange}
         />
 
-        <TextField
-          name="confirmPassword"
-          label="Confirm Password"
-          type={showPassword ? 'text' : 'password'}
-          InputProps={{
-            endAdornment: (
-              <InputAdornment position="end">
-                <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                  <Iconify icon={showPassword ? 'eva:eye-fill' : 'eva:eye-off-fill'} />
-                </IconButton>
-              </InputAdornment>
-            ),
-          }}
-        />
-        <TextField name="street" label="Street" />
-        <TextField name="city" label="City"/>
+        <TextField name="cstreet" label="Street" value={signinForm.cstreet} onChange={handleChange}/>
+        <TextField name="ccity" label="City" value={signinForm.ccity} onChange={handleChange}/>
       </Stack>
 
       <Grid container justifyContent="flex-end"  sx={{ my: 3 }}>
         <Grid item xs={6}>
-          <TextField name="state" label="State"/>
+          <TextField name="cstate" label="State" value={signinForm.cstate} onChange={handleChange}/>
         </Grid>
         <Grid item xs={6}>
-          <TextField name="zipCode" label="Zip Code"/>
+          <TextField name="czipcode" label="Zip Code" value={signinForm.czipcode} onChange={handleChange}/>
         </Grid>
       </Grid>
 
@@ -107,7 +107,7 @@ export default function LoginView() {
         type="submit"
         variant="contained"
         color="inherit"
-        onClick={handleClick}
+        onClick={handleSignin}
       >
         Create Account
       </LoadingButton>
