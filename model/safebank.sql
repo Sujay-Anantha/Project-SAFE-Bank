@@ -93,7 +93,7 @@ ALTER TABLE ais_loan ADD CONSTRAINT ais_loan_pk PRIMARY KEY ( acct_no );
 
 CREATE TABLE ais_per_loan (
     acct_no     BIGINT NOT NULL COMMENT 'Account Number ',
-    early_repay DECIMAL(5, 2) COMMENT 'Loan Early Repayment Fee'
+    early_repay DECIMAL(6, 2) COMMENT 'Loan Early Repayment Fee'
 );
 
 
@@ -155,6 +155,9 @@ ADD CONSTRAINT C_YR_PREMIUM CHECK (YR_PREMIUM >= 0);
 
 
 ALTER TABLE ais_acct MODIFY COLUMN acct_no BIGINT NOT NULL AUTO_INCREMENT;
+ALTER TABLE ais_cust MODIFY COLUMN custid BIGINT NOT NULL AUTO_INCREMENT;
+ALTER TABLE ais_edu MODIFY COLUMN eid INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE ais_home_insr MODIFY COLUMN hid INT NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE ais_stud_loan ADD CONSTRAINT ais_stud_loan_pk PRIMARY KEY ( acct_no );
 
@@ -366,6 +369,459 @@ END;
 
 DELIMITER ;
 
+-- Creating a stored procedure to fetch all customers
+DELIMITER //
+CREATE PROCEDURE GetAllCustomers()
+BEGIN
+    SELECT * FROM ais_cust;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE GetCustomerByID(IN inCustId BIGINT)
+BEGIN
+    -- Use the input parameter explicitly
+    SELECT * FROM ais_cust WHERE custid = inCustId;
+END //
+DELIMITER ;
+
+-- Creating a stored procedure to insert a customer
+DELIMITER //
+CREATE PROCEDURE CreateCustomer(
+    IN cfname VARCHAR(50),
+    IN clname VARCHAR(50),
+    IN cstreet VARCHAR(100),
+    IN ccity VARCHAR(50),
+    IN cstate VARCHAR(20),
+    IN czipcode INT
+)
+BEGIN
+    INSERT INTO ais_cust (cfname, clname, cstreet, ccity, cstate, czipcode)
+    VALUES (cfname, clname, cstreet, ccity, cstate, czipcode);
+END //
+DELIMITER ;
+
+-- Creating a stored procedure to update a customer by ID
+DELIMITER //
+CREATE PROCEDURE UpdateCustomer(
+    IN incustId BIGINT,
+    IN cfname VARCHAR(50),
+    IN clname VARCHAR(50),
+    IN cstreet VARCHAR(100),
+    IN ccity VARCHAR(50),
+    IN cstate VARCHAR(20),
+    IN czipcode INT
+)
+BEGIN
+    UPDATE ais_cust
+    SET cfname = cfname, clname = clname, cstreet = cstreet, ccity = ccity, cstate = cstate, czipcode = czipcode
+    WHERE custid = incustId;
+END //
+DELIMITER ;
+
+-- Creating a stored procedure to delete a customer by ID
+DELIMITER //
+CREATE PROCEDURE DeleteCustomer(IN incustId BIGINT)
+BEGIN
+    -- First, delete any records in tables referencing ais_acct
+    DELETE FROM ais_checking WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+    DELETE FROM ais_home_loan WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+    DELETE FROM ais_loan WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+    DELETE FROM ais_per_loan WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+    DELETE FROM ais_savings WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+    DELETE FROM ais_stud_loan WHERE acct_no IN (SELECT acct_no FROM ais_acct WHERE custid = incustId);
+
+    -- Then, delete the customer’s accounts from ais_acct itself
+    DELETE FROM ais_acct WHERE custid = incustId;
+
+    -- Finally, delete the customer from ais_cust
+    DELETE FROM ais_cust WHERE custid = incustId;
+END //
+DELIMITER ;
+
+DELIMITER //
+
+-- Stored procedure to fetch all accounts
+DELIMITER //
+CREATE PROCEDURE GetAllAccounts()
+BEGIN
+    SELECT
+        a.acct_no,
+        a.acct_type,
+        a.acct_name,
+        a.acity,
+        a.custid,
+        a.date_opened,
+        a.astate,
+        a.astatus,
+        a.astreet,
+        a.azipcode,
+        c.service_charge,
+        hl.hid,
+        hl.hbuilt_year,
+        hl.yr_premium,
+        l.lamount,
+        l.lmonths,
+        l.lpayment,
+        l.lrate,
+        pl.early_repay,
+        s.interest_rate,
+        sl.degree,
+        sl.eid,
+        sl.expgrad_month,
+        sl.expgrad_year,
+        sl.sid AS student_id
+    FROM ais_acct a
+    LEFT JOIN ais_checking c ON a.acct_no = c.acct_no
+    LEFT JOIN ais_home_loan hl ON a.acct_no = hl.acct_no
+    LEFT JOIN ais_loan l ON a.acct_no = l.acct_no
+    LEFT JOIN ais_per_loan pl ON a.acct_no = pl.acct_no
+    LEFT JOIN ais_savings s ON a.acct_no = s.acct_no
+    LEFT JOIN ais_stud_loan sl ON a.acct_no = sl.acct_no;
+END //
+DELIMITER ;
+
+
+
+-- Stored procedure to fetch an account by account number
+DELIMITER //
+CREATE PROCEDURE GetAccountByNumber(IN inacct_no BIGINT)
+BEGIN
+    SELECT
+        a.acct_no,
+        a.acct_name,
+        a.astreet,
+        a.acity,
+        a.astate,
+        a.azipcode,
+        a.date_opened,
+        a.astatus,
+        a.acct_type,
+        a.custid,
+        CASE
+            WHEN a.acct_type = 'C' THEN c.service_charge
+            ELSE NULL
+        END AS service_charge,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'HL' THEN hl.hid
+            ELSE NULL
+        END AS hid,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'HL' THEN hl.hbuilt_year
+            ELSE NULL
+        END AS house_built_year,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'HL' THEN hl.yr_premium
+            ELSE NULL
+        END AS yearly_premium,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'PL' THEN pl.early_repay
+            ELSE NULL
+        END AS early_repayment_fee,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'SL' THEN sl.eid
+            ELSE NULL
+        END AS eid,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'SL' THEN sl.sid
+            ELSE NULL
+        END AS student_id,
+        CASE
+            WHEN a.acct_type = 'L' AND l.ltype = 'SL' THEN sl.degree
+            ELSE NULL
+        END AS degree
+    FROM ais_acct a
+    LEFT JOIN ais_checking c ON a.acct_no = c.acct_no AND a.acct_type = 'C'
+    LEFT JOIN ais_loan l ON a.acct_no = l.acct_no AND a.acct_type = 'L'
+    LEFT JOIN ais_home_loan hl ON l.acct_no = hl.acct_no AND l.ltype = 'HL'
+    LEFT JOIN ais_per_loan pl ON l.acct_no = pl.acct_no AND l.ltype = 'PL'
+    LEFT JOIN ais_stud_loan sl ON l.acct_no = sl.acct_no AND l.ltype = 'SL'
+    WHERE a.acct_no = inacct_no;
+END //
+DELIMITER ;
+
+
+
+DELIMITER //
+CREATE PROCEDURE CreateAccount(
+    IN in_acct_name VARCHAR(30),
+    IN in_astreet VARCHAR(30),
+    IN in_acity VARCHAR(30),
+    IN in_astate VARCHAR(2),
+    IN in_azipcode INT,
+    IN in_date_opened DATETIME,
+    IN in_astatus CHAR(1),
+    IN in_acct_type VARCHAR(8),
+    IN in_custid BIGINT
+)
+BEGIN
+    INSERT INTO ais_acct (
+        acct_name, astreet, acity, astate, azipcode, date_opened, astatus, acct_type, custid
+    )
+    VALUES (in_acct_name, in_astreet, in_acity, in_astate, in_azipcode, in_date_opened, in_astatus, in_acct_type, in_custid);
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE UpdateAccount(
+    IN in_acct_no BIGINT,
+    IN in_acct_name VARCHAR(30),
+    IN in_astreet VARCHAR(30),
+    IN in_acity VARCHAR(30),
+    IN in_astate VARCHAR(2),
+    IN in_azipcode INT,
+    IN in_date_opened DATETIME,
+    IN in_astatus CHAR(1)
+)
+BEGIN
+    UPDATE ais_acct
+    SET acct_name = in_acct_name, astreet = in_astreet, acity = in_acity, astate = in_astate, azipcode = in_azipcode,
+        date_opened = in_date_opened, astatus = in_astatus
+    WHERE acct_no = in_acct_no;
+END //
+DELIMITER ;
+
+-- Creating a stored procedure to delete an account and its related records
+DELIMITER //
+CREATE PROCEDURE DeleteAccount(IN in_acct_no BIGINT)
+BEGIN
+    -- First, delete associated records in the child tables
+    DELETE FROM ais_checking WHERE acct_no = in_acct_no;
+    DELETE FROM ais_home_loan WHERE acct_no = in_acct_no;
+    DELETE FROM ais_loan WHERE acct_no = in_acct_no;
+    DELETE FROM ais_per_loan WHERE acct_no = in_acct_no;
+    DELETE FROM ais_savings WHERE acct_no = in_acct_no;
+    DELETE FROM ais_stud_loan WHERE acct_no = in_acct_no;
+
+    -- Finally, delete the account itself
+    DELETE FROM ais_acct WHERE acct_no = in_acct_no;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE GetAllEducationalInstitutions()
+BEGIN
+    SELECT * FROM ais_edu;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE GetEducationalInstitutionByID(IN ineid INT)
+BEGIN
+    SELECT * FROM ais_edu WHERE eid = ineid;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE CreateEducationalInstitution(
+    IN inename VARCHAR(100)
+)
+BEGIN
+    INSERT INTO ais_edu (ename) VALUES (inename);
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE UpdateEducationalInstitution(
+    IN ineid INT,
+    IN inename VARCHAR(100)
+)
+BEGIN
+    UPDATE ais_edu
+    SET ename = inename
+    WHERE eid = ineid;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE DeleteEducationalInstitution(IN ineid INT)
+BEGIN
+    -- First, delete student loans associated with the educational institution
+    DELETE FROM ais_stud_loan WHERE eid = ineid;
+    
+    -- Then, delete the educational institution record
+    DELETE FROM ais_edu WHERE eid = ineid;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE GetAllHomeInsurance()
+BEGIN
+    SELECT * FROM ais_home_insr;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE GetHomeInsuranceByID(IN inhid INT)
+BEGIN
+    SELECT * FROM ais_home_insr WHERE hid = inhid;
+END //
+DELIMITER ;
+
+
+DELIMITER //
+CREATE PROCEDURE CreateHomeInsurance(
+	IN inhname    VARCHAR(30) ,
+	IN inhstreet  VARCHAR(30) ,
+    IN inhcity    VARCHAR(30) ,
+    IN inhstate   VARCHAR(2) ,
+    IN inhzipcode INT
+)
+BEGIN
+    INSERT INTO ais_home_insr (hname, hstreet, hcity, hstate, hzipcode)
+    VALUES (inhname, inhstreet, inhcity, inhstate, inhzipcode);
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE UpdateHomeInsurance(
+    IN inhid INT,
+    IN inhname    VARCHAR(30) ,
+	IN inhstreet  VARCHAR(30) ,
+    IN inhcity    VARCHAR(30) ,
+    IN inhstate   VARCHAR(2) ,
+    IN inhzipcode INT
+)
+BEGIN
+    UPDATE ais_home_insr
+    SET hname = inhname, hstreet = inhstreet, hcity = inhcity, hstate = inhstate, hzipcode = inhzipcode
+    WHERE hid = inhid;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE DeleteHomeInsurance(IN inhid INT)
+BEGIN
+    -- First, delete student loans associated with the educational institution
+    DELETE FROM ais_home_loan WHERE hid = inhid;
+    
+    -- Then, delete the educational institution record
+    DELETE FROM ais_home_insr WHERE hid = inhid;
+END //
+DELIMITER ;
+
+
+
+
+-- Deadloack Prevention
+DELIMITER //
+CREATE PROCEDURE GetCustomerByIDForUpdate(IN inCustId BIGINT)
+BEGIN
+    SELECT *
+    FROM ais_cust
+    WHERE custid = inCustId
+    FOR UPDATE;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE UpdateAccountWithLock(
+    IN in_acct_no BIGINT,
+    IN in_acct_name VARCHAR(30),
+    IN in_astreet VARCHAR(30),
+    IN in_acity VARCHAR(30),
+    IN in_astate VARCHAR(2),
+    IN in_azipcode INT,
+    IN in_date_opened DATETIME,
+    IN in_astatus CHAR(1)
+)
+BEGIN
+    -- Select the account to lock it for the current transaction
+    SELECT acct_no
+    FROM ais_acct
+    WHERE acct_no = in_acct_no
+    FOR UPDATE;
+
+    -- Perform the update after the row is locked
+    UPDATE ais_acct
+    SET acct_name = in_acct_name, astreet = in_astreet, acity = in_acity, astate = in_astate, azipcode = in_azipcode,
+        date_opened = in_date_opened, astatus = in_astatus
+    WHERE acct_no = in_acct_no;
+END //
+DELIMITER ;
+
+-- Set lock wait timeout to 15 seconds
+SET SESSION innodb_lock_wait_timeout = 15;
+
+
+-- Logging and Auditing
+CREATE TABLE account_log (
+    log_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    acct_no BIGINT NOT NULL,
+    change_type VARCHAR(255) NOT NULL,
+    change_description TEXT,
+    changed_by VARCHAR(255),
+    change_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (acct_no) REFERENCES ais_acct(acct_no)
+);
+
+DELIMITER //
+CREATE TRIGGER log_account_update
+AFTER UPDATE ON ais_acct
+FOR EACH ROW
+BEGIN
+    INSERT INTO account_log (acct_no, change_type, change_description, changed_by)
+    VALUES (NEW.acct_no, 'Update', CONCAT('Account updated. Old Status: ', OLD.astatus, ' New Status: ', NEW.astatus), CURRENT_USER());
+END;
+DELIMITER ;
+
+-- Data Warehousing for Analytics
+CREATE TABLE account_summary (
+    acct_type VARCHAR(8),
+    average_balance DECIMAL(10,2),
+    total_accounts INT,
+    last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+DELIMITER //
+CREATE PROCEDURE update_account_summary()
+BEGIN
+    -- Clear the current summary data
+    DELETE FROM account_summary;
+
+    -- Insert new summary data with fully qualified column names
+    INSERT INTO account_summary (acct_type, average_balance, total_accounts)
+    SELECT a.acct_type, AVG(l.lamount), COUNT(a.acct_no)
+    FROM ais_acct a
+    LEFT JOIN ais_loan l ON a.acct_no = l.acct_no
+    GROUP BY a.acct_type;
+END //
+DELIMITER ;
+
+-- Performance Metrics
+CREATE INDEX idx_acct_status ON ais_acct(astatus);
+CREATE INDEX idx_loan_amount ON ais_loan(lamount);
+CREATE INDEX idx_loan_payment ON ais_loan(lpayment);
+
+-- Analytic procedures
+CREATE TABLE customer_metrics (
+    custid BIGINT PRIMARY KEY,
+    lifetime_value DECIMAL(15,2)
+);
+
+DELIMITER //
+CREATE PROCEDURE calculate_lifetime_value()
+BEGIN
+    -- Clear existing data in the customer_metrics table
+    TRUNCATE TABLE customer_metrics;
+
+    -- Insert or update customer lifetime values into the customer_metrics table
+    INSERT INTO customer_metrics (custid, lifetime_value)
+    SELECT a.custid, SUM(l.lpayment * l.lmonths)
+    FROM ais_loan l
+    JOIN ais_acct a ON l.acct_no = a.acct_no
+    GROUP BY a.custid
+    ON DUPLICATE KEY UPDATE lifetime_value = VALUES(lifetime_value);
+END //
+DELIMITER ;
+
+
+
+ 
 
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
 VALUES (1, 'John', 'Doe', '123 Maple St', 'Springfield', 'IL', 62704);
@@ -511,6 +967,8 @@ INSERT INTO ais_checking (acct_no, service_charge)
 VALUES (7001, 10.00);
 INSERT INTO ais_loan (acct_no, lrate, lamount, lpayment, lmonths, ltype)
 VALUES (7002, 5.00, 15000, 450, 36, 'PL');
+INSERT INTO ais_per_loan(acct_no, early_repay)
+VALUES (7002, 2000);
 
 -- Customer 8: Diane Reed with Checking and Student Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
@@ -551,7 +1009,8 @@ INSERT INTO ais_savings (acct_no, interest_rate)
 VALUES (10001, 1.75);
 INSERT INTO ais_loan (acct_no, lrate, lamount, lpayment, lmonths, ltype)
 VALUES (10002, 4.50, 10000, 300, 24, 'PL');
-
+INSERT INTO ais_per_loan(acct_no, early_repay)
+VALUES (10002, 1000);
 -- Customer 11: Sarah Miller with Checking, Savings, and Home Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
 VALUES (11, 'Sarah', 'Miller', '234 Oak Lane', 'Sunnydale', 'CA', 94010);
@@ -581,6 +1040,8 @@ INSERT INTO ais_savings (acct_no, interest_rate)
 VALUES (12002, 1.85);
 INSERT INTO ais_loan (acct_no, lrate, lamount, lpayment, lmonths, ltype)
 VALUES (12003, 5.25, 8000, 245, 36, 'PL');
+INSERT INTO ais_per_loan(acct_no, early_repay)
+VALUES (12003, 500);
 
 -- Customer 13: Jessica Lee with Checking, Savings, and Student Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
@@ -600,7 +1061,7 @@ VALUES (13003, 104, 'U', 5, 2024, 103);
 
 -- Customer 14: Home Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
-VALUES (14, 'William','Brown', '550 Cedar Lane', 'Greenwood', 'MO', 64030);
+VALUES (14, 'William', 'Brown', '550 Cedar Lane', 'Greenwood', 'MO', 64030);
 INSERT INTO ais_acct (acct_no, acct_name, astreet, acity, astate, azipcode, date_opened, astatus, acct_type, custid)
 VALUES (14001, 'William Checking', '550 Cedar Lane', 'Greenwood', 'MO', 64030, STR_TO_DATE('2023-12-01', '%Y-%m-%d'), 'A', 'C', 14),
        (14002, 'William Savings', '550 Cedar Lane', 'Greenwood', 'MO', 64030, STR_TO_DATE('2023-12-02', '%Y-%m-%d'), 'A', 'S', 14),
@@ -627,6 +1088,8 @@ INSERT INTO ais_savings (acct_no, interest_rate)
 VALUES (15002, 2.10);
 INSERT INTO ais_loan (acct_no, lrate, lamount, lpayment, lmonths, ltype)
 VALUES (15003, 5.00, 10000, 300, 24, 'PL');
+INSERT INTO ais_per_loan(acct_no, early_repay)
+VALUES (15003, 1000);
 
 -- Customer 16: Nathan Clark with Checking, Savings, and Student Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
@@ -672,6 +1135,8 @@ INSERT INTO ais_savings (acct_no, interest_rate)
 VALUES (18002, 1.65);
 INSERT INTO ais_loan (acct_no, lrate, lamount, lpayment, lmonths, ltype)
 VALUES (18003, 5.50, 5000, 152, 36, 'PL');
+INSERT INTO ais_per_loan(acct_no, early_repay)
+VALUES (18003, 200);
 
 -- Customer 19: Amy Gonzalez with Checking, Savings, and Student Loan
 INSERT INTO ais_cust (custid, cfname, clname, cstreet, ccity, cstate, czipcode)
