@@ -3,47 +3,40 @@ package net.bank.safebank.employer.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
-@DiscriminatorValue("S")
 @Table(name = "ais_savings")
-public class Savings {
-    @Id
-    private Long acct_no;
+@DiscriminatorValue("S")
+public class Savings extends Account {
 
-    @Column(nullable = false, precision = 4, scale = 2)
-    private BigDecimal interest_rate;
+    @Column(name = "interest_rate", nullable = false)
+    private BigDecimal interestRate;
 
-    public Savings() {
+    public Savings(){
     }
 
-    public Savings(BigDecimal interest_rate) {
-        this.interest_rate = interest_rate;
+    public Savings(BigDecimal interestRate) {
+        this.interestRate = interestRate;
     }
 
-    // Getters and Setters
-
-    public Long getAcct_no() {
-        return acct_no;
+    public Savings(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer, BigDecimal interestRate) {
+        super(accountNumber, accountName, street, city, state, zipcode, dateOpened, status, accountType, customer);
+        this.interestRate = interestRate;
     }
 
-    public void setAcct_no(Long acct_no) {
-        this.acct_no = acct_no;
+    public BigDecimal getInterestRate() {
+        return interestRate;
     }
 
-    public BigDecimal getInterest_rate() {
-        return interest_rate;
-    }
-
-    public void setInterest_rate(BigDecimal interest_rate) {
-        this.interest_rate = interest_rate;
+    public void setInterestRate(BigDecimal interestRate) {
+        this.interestRate = interestRate;
     }
 
     @Override
     public String toString() {
         return "Savings{" +
-                "acct_no=" + acct_no +
-                ", interest_rate=" + interest_rate +
+                "interestRate=" + interestRate +
                 '}';
     }
 }

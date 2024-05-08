@@ -1,66 +1,66 @@
 package net.bank.safebank.employer.service;
 
-import net.bank.safebank.employer.dto.AccountUpdateDTO;
-import net.bank.safebank.employer.entity.Account;
-import net.bank.safebank.employer.repository.AccountRepository;
+import jakarta.persistence.EntityManager;
+import net.bank.safebank.employer.entity.*;
+import net.bank.safebank.employer.repository.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService{
+    private static final Logger logger = LoggerFactory.getLogger(AccountServiceImpl.class);
+
     @Autowired
-    AccountRepository repository;
+    private AccountRepository accountRepository;
 
     @Override
-    public Account createAccount(Account account) {
-        Account account_saved = repository.save(account);
-        return account_saved;
+    public List<Account> getAllAccounts() {
+        return accountRepository.findAllAccounts();
     }
 
     @Override
-    public Account getAccountDetailsByAccountNumber(Long accountNumber) {
-        Optional<Account> account = repository.findById(accountNumber);
-        if(account.isEmpty()){
-            throw new RuntimeException("Account is not present");
+    public Account getAccountByNumber(Long accountNo) {
+        return accountRepository.findAccountByNumber(accountNo);
+    }
+
+    @Override
+    public void createAccount(Account account) {
+        try {
+            String dateOpened = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(account.getDateOpened());
+            accountRepository.createAccount(
+                    account.getAccountName(), account.getStreet(), account.getCity(),
+                    account.getState(), account.getZipcode(), dateOpened,
+                    account.getStatus(), account.getClass().getSimpleName(), account.getCustomerId()
+            );
+        } catch (Exception e) {
+            logger.error("Error creating account: ", e);
         }
-        Account account_found = account.get();
-        return account_found;
     }
 
     @Override
-    public List<Account> getAllAccountDetails() {
-        List<Account> listOfAccounts = repository.findAll();
-        return listOfAccounts;
-    }
-
-
-    @Override
-    public Account updateAccountDetails(Long acct_no, AccountUpdateDTO accountUpdateDTO) {
-        Optional<Account> account = repository.findById(acct_no);
-        if(account.isEmpty()){
-            throw new RuntimeException("Account is not present");
+    public void updateAccount(Long accountNo, Account account) {
+        try {
+            String dateOpened = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(account.getDateOpened());
+            accountRepository.updateAccount(
+                    accountNo, account.getAccountName(), account.getStreet(), account.getCity(),
+                    account.getState(), account.getZipcode(), dateOpened, account.getStatus()
+            );
+        } catch (Exception e) {
+            logger.error("Error updating account: ", e);
         }
-        Account account_found = account.get();
-        // Update only the allowed fields
-        account_found.setAcct_name(accountUpdateDTO.getAcct_name());
-        account_found.setAstreet(accountUpdateDTO.getAstreet());
-        account_found.setAcity(accountUpdateDTO.getAcity());
-        account_found.setAstate(accountUpdateDTO.getAstate());
-        account_found.setAzipcode(accountUpdateDTO.getAzipcode());
-        account_found.setAstatus(accountUpdateDTO.getAstatus());
-        account_found.setAcct_type(accountUpdateDTO.getAcct_type());
-
-        return repository.save(account_found);
     }
 
     @Override
-    public void closeAccount(Long accountNumber) {
-        getAccountDetailsByAccountNumber(accountNumber);
-        repository.deleteById(accountNumber);
+    public void deleteAccount(Long accountNo) {
+        accountRepository.deleteAccount(accountNo);
     }
 }
+
 
 

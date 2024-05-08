@@ -1,80 +1,52 @@
 package net.bank.safebank.employer.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+import java.util.Date;
+
 @Entity
-@DiscriminatorValue("SL")
 @Table(name = "ais_stud_loan")
-public class StudentLoan {
-    @Id
-    private Long acct_no;
+@DiscriminatorValue("SL")
+public class StudentLoan extends Loan {
 
-    @Column(nullable = false)
-    private Integer sid;
-
-    @Column(nullable = false, length = 1)
-    private String degree;
-
-    @Column(nullable = false)
-    private Byte expgrad_month;
-
-    @Column(nullable = false)
-    private Integer expgrad_year;
-
-    @ManyToOne
-    @JoinColumn(name = "eid", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "eid")
     private EducationalInstitution educationalInstitution;
 
-    public StudentLoan() {
+    @Column(name = "sid", nullable = false)
+    private Integer studentId;
+
+    @Column(name = "degree", nullable = false)
+    private String degree;
+
+    @Column(name = "expgrad_month", nullable = false)
+    private Byte expectedGraduationMonth;
+
+    @Column(name = "expgrad_year", nullable = false)
+    private Integer expectedGraduationYear;
+
+    public StudentLoan(){
+        super();
     }
 
-    public StudentLoan(Integer sid, String degree, Byte expgrad_month, Integer expgrad_year) {
-        this.sid = sid;
+    public StudentLoan(BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths, EducationalInstitution educationalInstitution, Integer studentId, String degree, Byte expectedGraduationMonth, Integer expectedGraduationYear) {
+        super(loanRate, loanAmount, loanPayment, loanMonths);
+        this.educationalInstitution = educationalInstitution;
+        this.studentId = studentId;
         this.degree = degree;
-        this.expgrad_month = expgrad_month;
-        this.expgrad_year = expgrad_year;
+        this.expectedGraduationMonth = expectedGraduationMonth;
+        this.expectedGraduationYear = expectedGraduationYear;
     }
 
-    // Getters and Setters
-
-    public Long getAcct_no() {
-        return acct_no;
-    }
-
-    public void setAcct_no(Long acct_no) {
-        this.acct_no = acct_no;
-    }
-
-    public Integer getSid() {
-        return sid;
-    }
-
-    public void setSid(Integer sid) {
-        this.sid = sid;
-    }
-
-    public String getDegree() {
-        return degree;
-    }
-
-    public void setDegree(String degree) {
+    public StudentLoan(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer, BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths, EducationalInstitution educationalInstitution, Integer studentId, String degree, Byte expectedGraduationMonth, Integer expectedGraduationYear) {
+        super(accountNumber, accountName, street, city, state, zipcode, dateOpened, status, accountType, customer, loanRate, loanAmount, loanPayment, loanMonths);
+        this.educationalInstitution = educationalInstitution;
+        this.studentId = studentId;
         this.degree = degree;
-    }
-
-    public Byte getExpgrad_month() {
-        return expgrad_month;
-    }
-
-    public void setExpgrad_month(Byte expgrad_month) {
-        this.expgrad_month = expgrad_month;
-    }
-
-    public Integer getExpgrad_year() {
-        return expgrad_year;
-    }
-
-    public void setExpgrad_year(Integer expgrad_year) {
-        this.expgrad_year = expgrad_year;
+        this.expectedGraduationMonth = expectedGraduationMonth;
+        this.expectedGraduationYear = expectedGraduationYear;
     }
 
     public EducationalInstitution getEducationalInstitution() {
@@ -85,15 +57,47 @@ public class StudentLoan {
         this.educationalInstitution = educationalInstitution;
     }
 
+    public Integer getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Integer studentId) {
+        this.studentId = studentId;
+    }
+
+    public String getDegree() {
+        return degree;
+    }
+
+    public void setDegree(String degree) {
+        this.degree = degree;
+    }
+
+    public Byte getExpectedGraduationMonth() {
+        return expectedGraduationMonth;
+    }
+
+    public void setExpectedGraduationMonth(Byte expectedGraduationMonth) {
+        this.expectedGraduationMonth = expectedGraduationMonth;
+    }
+
+    public Integer getExpectedGraduationYear() {
+        return expectedGraduationYear;
+    }
+
+    public void setExpectedGraduationYear(Integer expectedGraduationYear) {
+        this.expectedGraduationYear = expectedGraduationYear;
+    }
+
     @Override
     public String toString() {
         return "StudentLoan{" +
-                "acct_no=" + acct_no +
-                ", sid=" + sid +
+                "educationalInstitution=" + educationalInstitution +
+                ", studentId=" + studentId +
                 ", degree='" + degree + '\'' +
-                ", expgrad_month=" + expgrad_month +
-                ", expgrad_year=" + expgrad_year +
-                ", educationalInstitution=" + educationalInstitution +
+                ", expectedGraduationMonth=" + expectedGraduationMonth +
+                ", expectedGraduationYear=" + expectedGraduationYear +
                 '}';
     }
 }
+

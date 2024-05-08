@@ -3,45 +3,40 @@ package net.bank.safebank.employer.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
-@DiscriminatorValue("C")
 @Table(name = "ais_checking")
-public class Checking {
-    @Id
-    private Long acct_no;
+@DiscriminatorValue("C")
+public class Checking extends Account {
 
-    @Column(nullable = false, precision = 3, scale = 2)
-    private BigDecimal service_charge;
+    @Column(name = "service_charge", nullable = false)
+    private BigDecimal serviceCharge;
 
-    public Checking() {
+    public  Checking(){
     }
 
-    public Checking(BigDecimal service_charge) {
-        this.service_charge = service_charge;
+    public Checking(BigDecimal serviceCharge) {
+        this.serviceCharge = serviceCharge;
     }
 
-    public Long getAcct_no() {
-        return acct_no;
+    public Checking(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer, BigDecimal serviceCharge) {
+        super(accountNumber, accountName, street, city, state, zipcode, dateOpened, status, accountType, customer);
+        this.serviceCharge = serviceCharge;
     }
 
-    public void setAcct_no(Long acct_no) {
-        this.acct_no = acct_no;
+    public BigDecimal getServiceCharge() {
+        return serviceCharge;
     }
 
-    public BigDecimal getService_charge() {
-        return service_charge;
-    }
-
-    public void setService_charge(BigDecimal service_charge) {
-        this.service_charge = service_charge;
+    public void setServiceCharge(BigDecimal serviceCharge) {
+        this.serviceCharge = serviceCharge;
     }
 
     @Override
     public String toString() {
         return "Checking{" +
-                "acct_no=" + acct_no +
-                ", service_charge=" + service_charge +
+                "serviceCharge=" + serviceCharge +
                 '}';
     }
 }

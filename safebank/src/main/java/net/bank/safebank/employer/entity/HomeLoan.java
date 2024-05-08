@@ -1,69 +1,42 @@
 package net.bank.safebank.employer.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 @Entity
-@DiscriminatorValue("HL")
 @Table(name = "ais_home_loan")
-public class HomeLoan {
-    @Id
-    private Long acct_no;
+@DiscriminatorValue("HL")
+public class HomeLoan extends Loan {
 
-    @Column(nullable = false)
-    private Integer hacct_no;
-
-    @Column(nullable = false)
-    private Short hbuilt_year;
-
-    @Column(nullable = false, precision = 4, scale = 2)
-    private BigDecimal yr_premium;
-
-    @ManyToOne
-    @JoinColumn(name = "hid", nullable = false)
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "hid")
     private HomeInsurance homeInsurance;
 
-    public HomeLoan() {
+    @Column(name = "hbuilt_year", nullable = false)
+    private Short houseBuiltYear;
+
+    @Column(name = "yr_premium", nullable = false)
+    private BigDecimal yearlyPremium;
+
+    public HomeLoan(){
+        super();
     }
 
-    public HomeLoan(Short hbuilt_year, BigDecimal yr_premium) {
-        this.hbuilt_year = hbuilt_year;
-        this.yr_premium = yr_premium;
+    public HomeLoan(BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths, HomeInsurance homeInsurance, Short houseBuiltYear, BigDecimal yearlyPremium) {
+        super(loanRate, loanAmount, loanPayment, loanMonths);
+        this.homeInsurance = homeInsurance;
+        this.houseBuiltYear = houseBuiltYear;
+        this.yearlyPremium = yearlyPremium;
     }
 
-    // Getters and Setters
-
-    public Long getAcct_no() {
-        return acct_no;
-    }
-
-    public void setAcct_no(Long acct_no) {
-        this.acct_no = acct_no;
-    }
-
-    public Integer getHacct_no() {
-        return hacct_no;
-    }
-
-    public void setHacct_no(Integer hacct_no) {
-        this.hacct_no = hacct_no;
-    }
-
-    public Short getHbuilt_year() {
-        return hbuilt_year;
-    }
-
-    public void setHbuilt_year(Short hbuilt_year) {
-        this.hbuilt_year = hbuilt_year;
-    }
-
-    public BigDecimal getYr_premium() {
-        return yr_premium;
-    }
-
-    public void setYr_premium(BigDecimal yr_premium) {
-        this.yr_premium = yr_premium;
+    public HomeLoan(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer, BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths, HomeInsurance homeInsurance, Short houseBuiltYear, BigDecimal yearlyPremium) {
+        super(accountNumber, accountName, street, city, state, zipcode, dateOpened, status, accountType, customer, loanRate, loanAmount, loanPayment, loanMonths);
+        this.homeInsurance = homeInsurance;
+        this.houseBuiltYear = houseBuiltYear;
+        this.yearlyPremium = yearlyPremium;
     }
 
     public HomeInsurance getHomeInsurance() {
@@ -74,14 +47,28 @@ public class HomeLoan {
         this.homeInsurance = homeInsurance;
     }
 
+    public Short getHouseBuiltYear() {
+        return houseBuiltYear;
+    }
+
+    public void setHouseBuiltYear(Short houseBuiltYear) {
+        this.houseBuiltYear = houseBuiltYear;
+    }
+
+    public BigDecimal getYearlyPremium() {
+        return yearlyPremium;
+    }
+
+    public void setYearlyPremium(BigDecimal yearlyPremium) {
+        this.yearlyPremium = yearlyPremium;
+    }
+
     @Override
     public String toString() {
         return "HomeLoan{" +
-                "acct_no=" + acct_no +
-                ", hacct_no=" + hacct_no +
-                ", hbuilt_year=" + hbuilt_year +
-                ", yr_premium=" + yr_premium +
-                ", homeInsurance=" + homeInsurance +
+                "homeInsurance=" + homeInsurance +
+                ", houseBuiltYear=" + houseBuiltYear +
+                ", yearlyPremium=" + yearlyPremium +
                 '}';
     }
 }

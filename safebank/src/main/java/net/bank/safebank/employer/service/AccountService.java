@@ -1,14 +1,15 @@
 package net.bank.safebank.employer.service;
-
-import net.bank.safebank.employer.dto.AccountUpdateDTO;
 import net.bank.safebank.employer.entity.Account;
+import net.bank.safebank.employer.entity.Checking;
+import net.bank.safebank.employer.entity.Loan;
+import net.bank.safebank.employer.entity.Savings;
 
 import java.util.List;
 
 public interface AccountService {
-    public Account createAccount(Account account);
-    public Account getAccountDetailsByAccountNumber(Long accountNumber);
-    public List<Account> getAllAccountDetails();
-    public Account updateAccountDetails(Long accountNumber, AccountUpdateDTO accountUpdateDTO);
-    public void closeAccount(Long accountNumber);
+    List<Account> getAllAccounts();
+    Account getAccountByNumber(Long accountNo);
+    void createAccount(Account account);
+    void updateAccount(Long accountNo, Account account);
+    void deleteAccount(Long accountNo);
 }

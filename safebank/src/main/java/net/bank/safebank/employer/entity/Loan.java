@@ -3,99 +3,93 @@ package net.bank.safebank.employer.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
+@JsonSubTypes({
+        @JsonSubTypes.Type(value = HomeLoan.class, name = "HL"),
+        @JsonSubTypes.Type(value = StudentLoan.class, name = "SL"),
+        @JsonSubTypes.Type(value = PersonalLoan.class, name = "PL")
+})
 @Entity
-@DiscriminatorValue("L")
 @Table(name = "ais_loan")
-public class Loan {
-    @Id
-    private Long acct_no;
+@DiscriminatorValue("L")
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "ltype", discriminatorType = DiscriminatorType.STRING)
+public class Loan extends Account {
 
-    @Column(nullable = false, precision = 4, scale = 2)
-    private BigDecimal lrate;
+    @Column(name = "lrate", nullable = false)
+    private BigDecimal loanRate;
 
-    @Column(nullable = false, precision = 8, scale = 2)
-    private BigDecimal lamount;
+    @Column(name = "lamount", nullable = false)
+    private BigDecimal loanAmount;
 
-    @Column(nullable = false, precision = 8, scale = 2)
-    private BigDecimal lpayment;
+    @Column(name = "lpayment", nullable = false)
+    private BigDecimal loanPayment;
 
-    @Column(nullable = false)
-    private Short lmonths;
+    @Column(name = "lmonths", nullable = false)
+    private Short loanMonths;
 
-    @Column(nullable = false, length = 1)
-    private String ltype;
-
-    public Loan() {
+    public  Loan(){
     }
 
-    public Loan(BigDecimal lrate, BigDecimal lamount, BigDecimal lpayment, Short lmonths, String ltype) {
-        this.lrate = lrate;
-        this.lamount = lamount;
-        this.lpayment = lpayment;
-        this.lmonths = lmonths;
-        this.ltype = ltype;
+    public Loan(BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths) {
+        this.loanRate = loanRate;
+        this.loanAmount = loanAmount;
+        this.loanPayment = loanPayment;
+        this.loanMonths = loanMonths;
     }
 
-    // Getters and Setters
-
-    public Long getAcct_no() {
-        return acct_no;
+    public Loan(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer, BigDecimal loanRate, BigDecimal loanAmount, BigDecimal loanPayment, Short loanMonths) {
+        super(accountNumber, accountName, street, city, state, zipcode, dateOpened, status, accountType, customer);
+        this.loanRate = loanRate;
+        this.loanAmount = loanAmount;
+        this.loanPayment = loanPayment;
+        this.loanMonths = loanMonths;
     }
 
-    public void setAcct_no(Long acct_no) {
-        this.acct_no = acct_no;
+    public BigDecimal getLoanRate() {
+        return loanRate;
     }
 
-    public BigDecimal getLrate() {
-        return lrate;
+    public void setLoanRate(BigDecimal loanRate) {
+        this.loanRate = loanRate;
     }
 
-    public void setLrate(BigDecimal lrate) {
-        this.lrate = lrate;
+    public BigDecimal getLoanAmount() {
+        return loanAmount;
     }
 
-    public BigDecimal getLamount() {
-        return lamount;
+    public void setLoanAmount(BigDecimal loanAmount) {
+        this.loanAmount = loanAmount;
     }
 
-    public void setLamount(BigDecimal lamount) {
-        this.lamount = lamount;
+    public BigDecimal getLoanPayment() {
+        return loanPayment;
     }
 
-    public BigDecimal getLpayment() {
-        return lpayment;
+    public void setLoanPayment(BigDecimal loanPayment) {
+        this.loanPayment = loanPayment;
     }
 
-    public void setLpayment(BigDecimal lpayment) {
-        this.lpayment = lpayment;
+    public Short getLoanMonths() {
+        return loanMonths;
     }
 
-    public Short getLmonths() {
-        return lmonths;
-    }
-
-    public void setLmonths(Short lmonths) {
-        this.lmonths = lmonths;
-    }
-
-    public String getLtype() {
-        return ltype;
-    }
-
-    public void setLtype(String ltype) {
-        this.ltype = ltype;
+    public void setLoanMonths(Short loanMonths) {
+        this.loanMonths = loanMonths;
     }
 
     @Override
     public String toString() {
         return "Loan{" +
-                "acct_no=" + acct_no +
-                ", lrate=" + lrate +
-                ", lamount=" + lamount +
-                ", lpayment=" + lpayment +
-                ", lmonths=" + lmonths +
-                ", ltype='" + ltype + '\'' +
+                "loanRate=" + loanRate +
+                ", loanAmount=" + loanAmount +
+                ", loanPayment=" + loanPayment +
+                ", loanMonths=" + loanMonths +
                 '}';
     }
 }

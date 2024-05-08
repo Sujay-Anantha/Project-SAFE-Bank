@@ -1,110 +1,116 @@
 package net.bank.safebank.employer.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import java.util.List;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "ais_home_insr")
 public class HomeInsurance {
     @Id
-    private Integer hid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "hid")
+    private Integer id;
 
-    @Column(nullable = false, length = 30)
-    private String hname;
+    @Column(name = "hname", nullable = false)
+    private String name;
 
-    @Column(nullable = false, length = 30)
-    private String hstreet;
+    @Column(name = "hstreet", nullable = false)
+    private String street;
 
-    @Column(nullable = false, length = 30)
-    private String hcity;
+    @Column(name = "hcity", nullable = false)
+    private String city;
 
-    @Column(nullable = false, length = 2)
-    private String hstate;
+    @Column(name = "hstate", nullable = false)
+    private String state;
 
-    @Column(nullable = false)
-    private int hzipcode;
+    @Column(name = "hzipcode", nullable = false)
+    private Integer zipcode;
 
     @OneToMany(mappedBy = "homeInsurance", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<HomeLoan> homeLoans;
+    @JsonIgnore
+    private Set<HomeLoan> homeLoans;
 
     public HomeInsurance() {
     }
 
-    public HomeInsurance(String hname, String hstreet, String hcity, String hstate, int hzipcode) {
-        this.hname = hname;
-        this.hstreet = hstreet;
-        this.hcity = hcity;
-        this.hstate = hstate;
-        this.hzipcode = hzipcode;
+    public HomeInsurance(Integer id, String name, String street, String city, String state, Integer zipcode, Set<HomeLoan> homeLoans) {
+        this.id = id;
+        this.name = name;
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipcode = zipcode;
+        this.homeLoans = homeLoans;
     }
 
-    // Getters and Setters
-
-    public Integer getHid() {
-        return hid;
+    public Integer getId() {
+        return id;
     }
 
-    public void setHid(Integer hid) {
-        this.hid = hid;
+    public void setId(Integer id) {
+        this.id = id;
     }
 
-    public String getHname() {
-        return hname;
+    public String getName() {
+        return name;
     }
 
-    public void setHname(String hname) {
-        this.hname = hname;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getHstreet() {
-        return hstreet;
+    public String getStreet() {
+        return street;
     }
 
-    public void setHstreet(String hstreet) {
-        this.hstreet = hstreet;
+    public void setStreet(String street) {
+        this.street = street;
     }
 
-    public String getHcity() {
-        return hcity;
+    public String getCity() {
+        return city;
     }
 
-    public void setHcity(String hcity) {
-        this.hcity = hcity;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getHstate() {
-        return hstate;
+    public String getState() {
+        return state;
     }
 
-    public void setHstate(String hstate) {
-        this.hstate = hstate;
+    public void setState(String state) {
+        this.state = state;
     }
 
-    public int getHzipcode() {
-        return hzipcode;
+    public Integer getZipcode() {
+        return zipcode;
     }
 
-    public void setHzipcode(int hzipcode) {
-        this.hzipcode = hzipcode;
+    public void setZipcode(Integer zipcode) {
+        this.zipcode = zipcode;
     }
 
-    public List<HomeLoan> getHomeLoans() {
+    public Set<HomeLoan> getHomeLoans() {
         return homeLoans;
     }
 
-    public void setHomeLoans(List<HomeLoan> homeLoans) {
+    public void setHomeLoans(Set<HomeLoan> homeLoans) {
         this.homeLoans = homeLoans;
     }
 
     @Override
     public String toString() {
         return "HomeInsurance{" +
-                "hid=" + hid +
-                ", hname='" + hname + '\'' +
-                ", hstreet='" + hstreet + '\'' +
-                ", hcity='" + hcity + '\'' +
-                ", hstate='" + hstate + '\'' +
-                ", hzipcode=" + hzipcode +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipcode=" + zipcode +
                 ", homeLoans=" + homeLoans +
                 '}';
     }

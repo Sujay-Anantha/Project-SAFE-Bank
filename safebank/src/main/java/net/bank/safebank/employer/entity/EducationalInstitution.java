@@ -1,58 +1,63 @@
 package net.bank.safebank.employer.entity;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import java.util.List;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "ais_edu")
 public class EducationalInstitution {
     @Id
-    private Integer eid;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "eid")
+    private Integer id;
 
-    @Column(nullable = false, length = 30)
-    private String ename;
+    @Column(name = "ename", nullable = false)
+    private String name;
 
     @OneToMany(mappedBy = "educationalInstitution", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<StudentLoan> studentLoans;
+    @JsonIgnore
+    private Set<StudentLoan> studentLoans;
 
     public EducationalInstitution() {
     }
 
-    public EducationalInstitution(String ename) {
-        this.ename = ename;
+    public EducationalInstitution(Integer id, String name, Set<StudentLoan> studentLoans) {
+        this.id = id;
+        this.name = name;
+        this.studentLoans = studentLoans;
     }
 
-    // Getters and Setters
-
-    public Integer getEid() {
-        return eid;
-    }
-
-    public void setEid(Integer eid) {
-        this.eid = eid;
-    }
-
-    public String getEname() {
-        return ename;
-    }
-
-    public void setEname(String ename) {
-        this.ename = ename;
-    }
-
-    public List<StudentLoan> getStudentLoans() {
+    public Set<StudentLoan> getStudentLoans() {
         return studentLoans;
     }
 
-    public void setStudentLoans(List<StudentLoan> studentLoans) {
+    public void setStudentLoans(Set<StudentLoan> studentLoans) {
         this.studentLoans = studentLoans;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     @Override
     public String toString() {
         return "EducationalInstitution{" +
-                "eid=" + eid +
-                ", ename='" + ename + '\'' +
+                "id=" + id +
+                ", name='" + name + '\'' +
                 ", studentLoans=" + studentLoans +
                 '}';
     }

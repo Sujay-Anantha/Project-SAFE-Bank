@@ -1,52 +1,24 @@
-package net.bank.safebank.employer.entity;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import jakarta.persistence.*;
+package net.bank.safebank.employer.dto;
 
 import java.util.Date;
 
-
-@Entity
-@Table(name = "ais_acct")
-@Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "acct_type", discriminatorType = DiscriminatorType.STRING)
-public class Account {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "acct_no")
+public class AccountDTO {
     private Long accountNumber;
-
-    @Column(name = "acct_name", nullable = false)
     private String accountName;
-
-    @Column(name = "astreet", nullable = false)
     private String street;
-
-    @Column(name = "acity", nullable = false)
     private String city;
-
-    @Column(name = "astate", nullable = false)
     private String state;
-
-    @Column(name = "azipcode", nullable = false)
     private Integer zipcode;
-
-    @Column(name = "date_opened", nullable = false)
     private java.util.Date dateOpened;
-
-    @Column(name = "astatus", nullable = false)
     private String status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "custid", nullable = false)
-    @JsonBackReference
-    private Customer customer;
+    // Constructors
 
-    public Account() {
+
+    public AccountDTO() {
     }
 
-    public Account(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status, String accountType, Customer customer) {
+    public AccountDTO(Long accountNumber, String accountName, String street, String city, String state, Integer zipcode, Date dateOpened, String status) {
         this.accountNumber = accountNumber;
         this.accountName = accountName;
         this.street = street;
@@ -55,8 +27,9 @@ public class Account {
         this.zipcode = zipcode;
         this.dateOpened = dateOpened;
         this.status = status;
-        this.customer = customer;
     }
+
+    // Getters and Setters
 
     public Long getAccountNumber() {
         return accountNumber;
@@ -122,20 +95,9 @@ public class Account {
         this.status = status;
     }
 
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public void setCustomer(Customer customer) {
-        this.customer = customer;
-    }
-    public Long getCustomerId() {
-        return customer != null ? customer.getId() : null;
-    }
-
     @Override
     public String toString() {
-        return "Account{" +
+        return "AccountDTO{" +
                 "accountNumber=" + accountNumber +
                 ", accountName='" + accountName + '\'' +
                 ", street='" + street + '\'' +
@@ -144,7 +106,6 @@ public class Account {
                 ", zipcode=" + zipcode +
                 ", dateOpened=" + dateOpened +
                 ", status='" + status + '\'' +
-                ", customer=" + customer +
                 '}';
     }
 }

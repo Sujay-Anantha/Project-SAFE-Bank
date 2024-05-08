@@ -1,128 +1,129 @@
 package net.bank.safebank.employer.entity;
 
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-
-import java.util.List;
-
+import java.util.Set;
 
 @Entity
 @Table(name = "ais_cust")
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long cust_id;
+    @Column(name = "custid")
+    private Long id;
 
-    @Column(nullable = false, length = 30)
-    private String cfname;
+    @Column(name = "cfname", nullable = false)
+    private String firstName;
 
-    @Column(nullable = false, length = 30)
-    private String clname;
+    @Column(name = "clname", nullable = false)
+    private String lastName;
 
-    @Column(nullable = false, length = 30)
-    private String cstreet;
+    @Column(name = "cstreet", nullable = false)
+    private String street;
 
-    @Column(nullable = false, length = 30)
-    private String ccity;
+    @Column(name = "ccity", nullable = false)
+    private String city;
 
-    @Column(nullable = false, length = 2)
-    private String cstate;
+    @Column(name = "cstate", nullable = false)
+    private String state;
 
-    @Column(nullable = false)
-    private int czipcode;
+    @Column(name = "czipcode", nullable = false)
+    private Integer zipcode;
 
-    @OneToMany(mappedBy = "customer")
-    private List<Account> accounts;
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<Account> accounts;
 
     public Customer() {
     }
 
-    public Customer(String cfname, String clname, String cstreet, String ccity, String cstate, int czipcode) {
-        this.cfname = cfname;
-        this.clname = clname;
-        this.cstreet = cstreet;
-        this.ccity = ccity;
-        this.cstate = cstate;
-        this.czipcode = czipcode;
+    public Customer(Long id, String firstName, String lastName, String street, String city, String state, Integer zipcode, Set<Account> accounts) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.street = street;
+        this.city = city;
+        this.state = state;
+        this.zipcode = zipcode;
+        this.accounts = accounts;
     }
 
-    // Getters and Setters
-
-    public Long getCust_id() {
-        return cust_id;
+    public Long getId() {
+        return id;
     }
 
-    public void setCust_id(Long cust_id) {
-        this.cust_id = cust_id;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public String getCfname() {
-        return cfname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setCfname(String cfname) {
-        this.cfname = cfname;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
     }
 
-    public String getClname() {
-        return clname;
+    public String getLastName() {
+        return lastName;
     }
 
-    public void setClname(String clname) {
-        this.clname = clname;
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
-    public String getCstreet() {
-        return cstreet;
+    public String getStreet() {
+        return street;
     }
 
-    public void setCstreet(String cstreet) {
-        this.cstreet = cstreet;
+    public void setStreet(String street) {
+        this.street = street;
     }
 
-    public String getCcity() {
-        return ccity;
+    public String getCity() {
+        return city;
     }
 
-    public void setCcity(String ccity) {
-        this.ccity = ccity;
+    public void setCity(String city) {
+        this.city = city;
     }
 
-    public String getCstate() {
-        return cstate;
+    public String getState() {
+        return state;
     }
 
-    public void setCstate(String cstate) {
-        this.cstate = cstate;
+    public void setState(String state) {
+        this.state = state;
     }
 
-    public int getCzipcode() {
-        return czipcode;
+    public Integer getZipcode() {
+        return zipcode;
     }
 
-    public void setCzipcode(int czipcode) {
-        this.czipcode = czipcode;
+    public void setZipcode(Integer zipcode) {
+        this.zipcode = zipcode;
     }
 
-    public List<Account> getAccounts() {
+    public Set<Account> getAccounts() {
         return accounts;
     }
 
-    public void setAccounts(List<Account> accounts) {
+    public void setAccounts(Set<Account> accounts) {
         this.accounts = accounts;
     }
 
     @Override
     public String toString() {
         return "Customer{" +
-                "cust_id=" + cust_id +
-                ", cfname='" + cfname + '\'' +
-                ", clname='" + clname + '\'' +
-                ", cstreet='" + cstreet + '\'' +
-                ", ccity='" + ccity + '\'' +
-                ", cstate='" + cstate + '\'' +
-                ", czipcode=" + czipcode +
+                "id=" + id +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", street='" + street + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", zipcode=" + zipcode +
                 ", accounts=" + accounts +
                 '}';
     }
 }
-
