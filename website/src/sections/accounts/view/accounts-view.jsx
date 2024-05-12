@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+// import DOMPurify from 'dompurify';
 import React, { useState } from 'react';
 
 import Grid from '@mui/material/Grid';
@@ -15,19 +15,16 @@ import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
 import FormControl from '@mui/material/FormControl';
 import TableContainer from '@mui/material/TableContainer';
-// import TablePagination from '@mui/material/TablePagination';
 import { Dialog, DialogTitle, DialogActions, DialogContent } from '@mui/material';
 
+import { visuallyHidden } from '../utils';
 import Iconify from '../../../components/iconify';
 import { accounts } from '../../../_mock/accounts';
-import Scrollbar from '../../../components/scrollbar';
-import accountService from '../../../service/accountService';
-
-// import TableNoData from '../table-no-data';
-// import TableEmptyRows from '../table-empty-rows';
 import AccountsTableRow from '../accounts-table-row';
+import Scrollbar from '../../../components/scrollbar';
 import AccountsTableHead from '../accounts-table-head';
-import { applyFilter, getComparator, visuallyHidden } from '../utils';
+// import accountService from '../../../service/accountService';
+import customerService from '../../../service/customerService';
 // import AccountsTableToolbar from '../accounts-table-toolbar';
 
 // ----------------------------------------------------------------------
@@ -35,63 +32,61 @@ import { applyFilter, getComparator, visuallyHidden } from '../utils';
 class AccountComponent extends React.Component {
   constructor(props){
     super(props);
-    // this.state={
-    //     id:this.props.match.params.id,
-    //    userId:null,
-    //    password:null
-        
-    // }
     this.state={
       accounts:[]
     }
-
-    // this.changeIdHandler= this.changeIdHandler.bind(this);
-    // this.changeNameHandler=this.changeNameHandler.bind(this);
-    // this.signup=this.signup.bind(this);
-    // this.login=this.login.bind(this);
   }
 
   componentDidMount() {
-    accountService.constructor.getAllAccountDetails().then((res) => this.setState({accounts:res}));
+    customerService.constructor.getCustomerDetailsByCustomerID(sessionStorage.getItem('custid')).then((res) => this.setState({accounts:res.accounts}));
   }
+
   
   render(){
     const accts = this.state;
-    // console.log(accts.accounts);
+    console.log(accts);
     return (
-      // <div>
-      //   {accts.accounts.map((row) => (  
-      //     <tr key={row.acct_no}>
-      //       <td>{row.acct_name}</td>
-      //       <td>{row.astreet}</td>
-      //       <td>{row.date_opened}</td>
-      //       <td>{row.astatus}</td>
-      //     </tr>        
-      //   ))}
-      // </div>
       <TableBody>
         {accts.accounts
           .map((row) => (
             <AccountsTableRow
-              key={row.id}
-              accNo={row.accNo}
-              accName={row.accName}
-              address={row.address}
+              key={row.accountNumber}
+              accNo={row.accountNumber}
+              accName={row.accountName}
+              street={row.street}
+              city={row.city}
+              state={row.state}
+              zipcode={row.zipcode}
               dateOpened={row.dateOpened}
               status={row.status}
               // selected={selected.indexOf(row.accNo) !== -1}
               // handleClick={(event) => handleClick(event, row.accNo)}
+              isAuthorized={isAuthorized}
             />
           ))}
-
-        {/* {notFound && <TableNoData query={filterName} />} */}
       </TableBody>
-
-
     )
   }
 
 }
+
+const isAuthorized = () => {
+  const role = sessionStorage.getItem('role');
+  if (role === "customer") {
+    return visuallyHidden
+  }
+  return 'none'
+};
+
+// async function addAccount(credentials) {
+//   return fetch('http://localhost:8080/account/createChecking', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify(credentials)
+//   })
+// }
 
 export default function AccountsView() {
   // const [page, setPage] = useState(0);
@@ -165,36 +160,39 @@ export default function AccountsView() {
   //   setFilterName(event.target.value);
   // };
 
-  const dataFiltered = applyFilter({
-    inputData: accounts,
-    comparator: getComparator(order, orderBy),
-    // filterName,
-  });
+  // const dataFiltered = applyFilter({
+  //   inputData: accounts,
+  //   comparator: getComparator(order, orderBy),
+  //   // filterName,
+  // });
 
-  const isAuthorized = () => {
-    // TODO: get customer role
-    if (add) {
-      return visuallyHidden
-    }
-    return 'none'
-  };
+
   
-  const [addForm, setAddForm] = useState({ acctype: '', acct_name: '', astreet: '', acity: '', astate: '', azipcode: ''});
+  const [addForm, setAddForm] = useState({ accountType: '', accountName: '', street: '', city: '', state: '', zipcode: '', dateOpened: '', status: '', serviceCharge: ''});
   
   const handleChange = (e) => {
     const {name, value} = e.target;
-    setAddForm({ ...addForm, [name]: value });
+    setAddForm({ ...addForm, [name]: e.target.type === 'number' ? parseInt(value, 10) : value });
   };
 
   const handleAdd = () => {
     console.log(addForm);
-    const sanitizedAddForm=DOMPurify.sanitize(addForm);
-    console.log(sanitizedAddForm);
-    // TODO: call API to add account
+    // const sanitizedAddForm=DOMPurify.sanitize(addForm);
+    // const addstatus = addAccount(sanitizedAddForm);
+    // console.log(addstatus);
+    // addstatus.then(response =>
+    //   response.json().then(json => ({
+    //     status: response.status,
+    //     json
+    //   })
+    // ))
+    // .then(({ status, json }) => {
+    //   console.log({ status, json });
+    //   if (status === 201) {
+      //   }
+      // })
     closeAddMenu();
   }
-
-  // const notFound = !dataFiltered.length && !!filterName;
 
   return (
     <Container>
@@ -208,38 +206,43 @@ export default function AccountsView() {
         <Dialog 
         open={!!add}
         onClose={closeAddMenu}
-      >
+        >
         <DialogTitle>Add Account</DialogTitle>
         <DialogContent>
           <Stack spacing={2} paddingTop={2}>
             <FormControl sx={{ minWidth: 120 }}>
               <InputLabel id="roleLabel">Account Type</InputLabel>
               <Select
-                name="acctype"
+                name="accountType"
                 label="Account Type"
-                // labelId="ac"
-                value={addForm.acctype}
+                value={addForm.accountType}
                 onChange={handleChange}
               >
-                <MenuItem value='checking'>Checking</MenuItem>
-                <MenuItem value='savings'>Savings</MenuItem>
-                <MenuItem value='loan'>Loan</MenuItem>
+                <MenuItem value='C'>Checking</MenuItem>
+                <MenuItem value='S'>Savings</MenuItem>
+                <MenuItem value='L'>Loan</MenuItem>
               </Select>
             </FormControl>
-            <TextField name="acct_name" value={addForm.acct_name} label="Account Name" onChange = {handleChange}/>
-            <TextField name="astreet" value={addForm.astreet} label="Street" onChange = {handleChange}/>
-            <TextField name="acity" value={addForm.acity} label="City" onChange = {handleChange}/>
+            <TextField name="accountName" value={addForm.accountName} label="Account Name" onChange={handleChange}/>
+            <TextField name="street" value={addForm.street} label="Street" onChange={handleChange}/>
+            <TextField name="city" value={addForm.city} label="City" onChange={handleChange}/>
 
           </Stack>
 
           <Grid container justifyContent="flex-end"  sx={{ my: 3 }}>
             <Grid item xs={6}>
-              <TextField name="astate" value={addForm.astate} label="State" onChange = {handleChange}/>
+              <TextField name="state" value={addForm.state} label="State" onChange={handleChange}/>
             </Grid>
             <Grid item xs={6}>
-              <TextField name="azipcode" value={addForm.azipcode} label="Zip Code" onChange = {handleChange}/>
+              <TextField name="zipcode" value={addForm.zipcode} label="Zip Code" onChange={handleChange} type="number"/>
             </Grid>
           </Grid>
+
+          <Stack spacing={2}>
+            <TextField name="dateOpened" value={addForm.dateOpened} label="Date Opened" onChange = {handleChange} type="date"/>
+            <TextField name="accountNumber" value={addForm.accountNumber} label="Account Number" onChange = {handleChange} type="number"/>
+            <TextField name="serviceCharge" value={addForm.serviceCharge} label="Service Charge" onChange = {handleChange} type="number"/>
+          </Stack>
         </DialogContent>
 
         <DialogActions>
@@ -257,11 +260,10 @@ export default function AccountsView() {
         </Dialog>
       </Stack>
       
-      {/* Checking Account */}
       <Card>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" padding={2}>
+        {/* <Stack direction="row" alignItems="center" justifyContent="space-between" padding={2}>
           <Typography variant="h5">Checking</Typography>
-        </Stack>
+        </Stack> */}
         
 
         <Scrollbar>
@@ -283,7 +285,7 @@ export default function AccountsView() {
                   { id: '' },
                 ]}
               />
-              <TableBody>
+              {/* <TableBody>
                 {dataFiltered
                   .map((row) => (
                     <AccountsTableRow
@@ -298,7 +300,7 @@ export default function AccountsView() {
                     />
                   ))}
 
-              </TableBody>
+              </TableBody> */}
               <AccountComponent/>
             </Table>
           </TableContainer>
@@ -306,101 +308,6 @@ export default function AccountsView() {
 
       </Card>
 
-      {/* Savings Account */}
-      <Card>
-        <Stack direction="row" alignItems="center" justifyContent="space-between" padding={2}>
-          <Typography variant="h5">Savings</Typography>
-        </Stack>
-
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <AccountsTableHead
-                order={order}
-                orderBy={orderBy}
-                rowCount={accounts.length}
-                // numSelected={selected.length}
-                onRequestSort={handleSort}
-                // onSelectAllClick={handleSelectAllClick}
-                headLabel={[
-                  { id: 'accNo', label: 'Account No' },
-                  { id: 'accName', label: 'Account Name' },
-                  { id: 'address', label: 'Address' },
-                  { id: 'dateOpened', label: 'Date Opened', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
-              <TableBody>
-                {dataFiltered
-                  .map((row) => (
-                    <AccountsTableRow
-                      key={row.id}
-                      accNo={row.accNo}
-                      accName={row.accName}
-                      address={row.address}
-                      dateOpened={row.dateOpened}
-                      status={row.status}
-                      // selected={selected.indexOf(row.accNo) !== -1}
-                      // handleClick={(event) => handleClick(event, row.accNo)}
-                    />
-                  ))}
-
-
-                {/* {notFound && <TableNoData query={filterName} />} */}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
-      </Card>
-
-      {/* Loan Account */}
-      <Card>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" padding={2}>
-          <Typography variant="h5">Loan</Typography>
-        </Stack>
-
-        <Scrollbar>
-          <TableContainer sx={{ overflow: 'unset' }}>
-            <Table sx={{ minWidth: 800 }}>
-              <AccountsTableHead
-                order={order}
-                orderBy={orderBy}
-                rowCount={accounts.length}
-                // numSelected={selected.length}
-                onRequestSort={handleSort}
-                // onSelectAllClick={handleSelectAllClick}
-                headLabel={[
-                  { id: 'accNo', label: 'Account No' },
-                  { id: 'accName', label: 'Account Name' },
-                  { id: 'address', label: 'Address' },
-                  { id: 'dateOpened', label: 'Date Opened', align: 'center' },
-                  { id: 'status', label: 'Status' },
-                  { id: '' },
-                ]}
-              />
-              <TableBody>
-                {dataFiltered
-                  .map((row) => (
-                    <AccountsTableRow
-                      key={row.id}
-                      accNo={row.accNo}
-                      accName={row.accName}
-                      address={row.address}
-                      dateOpened={row.dateOpened}
-                      status={row.status}
-                      // selected={selected.indexOf(row.accNo) !== -1}
-                      // handleClick={(event) => handleClick(event, row.accNo)}
-                    />
-                  ))}
-
-                {/* {notFound && <TableNoData query={filterName} />} */}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </Scrollbar>
-
-      </Card>
-    </Container>
+     </Container>
   );
 }

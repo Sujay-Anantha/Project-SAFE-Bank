@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import DOMPurify from 'dompurify';
+// import DOMPurify from 'dompurify';
+import PropTypes from 'prop-types';
 
 import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
@@ -24,7 +25,18 @@ import Iconify from '../../components/iconify';
 
 // ----------------------------------------------------------------------
 
-export default function LoginView() {
+// async function loginUser(credentials) {
+//   return fetch('http://localhost:8080/login', {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json'
+//     },
+//     body: JSON.stringify(credentials)
+//   })
+//     .then(data => data.json())
+//  }
+
+export default function LoginView({setUser}) {
   const theme = useTheme();
 
   const router = useRouter();
@@ -38,18 +50,21 @@ export default function LoginView() {
     setLoginForm({ ...loginForm, [name]: value });
   }
 
-  const authentication = (email, password) => {
+  const authentication = (email, password, role) => {
     // const raw = apiClient.request(`/db/get?user=${user}`, 'GET', {})
     // if (raw.status === 200 && raw.data.password === password) {
     //   return true;
     // }
     // TODO: call API to check login info is correct
-    
-    if (DOMPurify.sanitize(email)==="1" && DOMPurify.sanitize(password)==="2") {
-      router.push('/accounts');
+    // const user = loginUser(DOMPurify.sanitize(email), DOMPurify.sanitize(password))
+
+    if (email==="1" && password==="2") {
+      alert("Wrong username or password")
     }
     else {
-      alert("Wrong username or password")
+      sessionStorage.setItem('role', role);
+      sessionStorage.setItem('custid', password);
+      router.push('/accounts');
     }
   }
 
@@ -103,7 +118,7 @@ export default function LoginView() {
         variant="contained"
         color="inherit"
         sx={{ my: 3 }}
-        onClick={() => authentication(loginForm.email, loginForm.password)}
+        onClick={() => authentication(loginForm.email, loginForm.password, loginForm.role)}
       >
         Login
       </LoadingButton>
@@ -144,3 +159,7 @@ export default function LoginView() {
     </Box>
   );
 }
+
+LoginView.propTypes = {
+  setUser: PropTypes.func,
+};

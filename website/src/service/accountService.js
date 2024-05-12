@@ -1,6 +1,6 @@
 // import axios from 'react-axios';
 
-const URL="http://localhost:3306/account";
+const URL="http://localhost:8080/account";
 class AccountService {
 
     // createAccount(Account){
@@ -40,7 +40,7 @@ class AccountService {
         return fetch(`${URL}/getallaccount`,
         {
             method: "GET",
-            mode: 'cors',
+            // mode: 'cors',
             headers: {
                 'Content-Type': 'application/json'
             }

@@ -10,7 +10,6 @@ import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
-// import Checkbox from '@mui/material/Checkbox';
 import TableCell from '@mui/material/TableCell';
 import InputLabel from '@mui/material/InputLabel';
 import Typography from '@mui/material/Typography';
@@ -18,22 +17,70 @@ import IconButton from '@mui/material/IconButton';
 import FormControl from '@mui/material/FormControl';
 import { Dialog, DialogTitle, DialogActions, DialogContent, DialogContentText } from '@mui/material';
 
-import { visuallyHidden } from './utils';
 import Label from '../../components/label';
 import Iconify from '../../components/iconify';
-import accountService from '../../service/accountService';
+// import accountService from '../../service/accountService';
 
 
 // ----------------------------------------------------------------------
+
+const validateQueryParam=(queryParam)=>{
+  const infiltratedParams=queryParam.toString().split('&&');
+  console.log(infiltratedParams)
+  if(infiltratedParams.length>1) return false;
+  return true;
+}
+
+async function editAccount(acc) {
+  if (!validateQueryParam(acc)) {
+    return 'none'
+  }
+  return fetch(`http://localhost:8080/account/${acc}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      accountNumber: acc.accountNumber,
+      accountName: acc.accountName,
+      street: acc.street,
+      city: acc.city,
+      state: acc.state,
+      zipcode: acc.zipcode,
+      dateOpened: acc.dateOpened,
+      status: 'A',
+      accountType: 'C',
+      serviceCharge: acc.serviceCharge
+    })
+  })
+    .then(data => data.json())
+ }
+
+async function deleteAccount(acc_no) {
+  if (validateQueryParam(acc_no)) {
+    return fetch(`http://localhost:8080/account/delete/${acc_no}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+    })
+      .then(data => data.json())
+  }
+  return 'none'
+}
 
 export default function AccountsTableRow({
   selected,
   accNo,
   accName,
-  address,
+  street,
+  city,
+  state,
+  zipcode,
   dateOpened,
   status,
   handleClick,
+  isAuthorized
 }) {
   const [open, setOpen] = useState(null);
 
@@ -66,52 +113,11 @@ export default function AccountsTableRow({
   };
 
   const handleDelete = (accno) => {
-    // TODO: call API to delete account
-    accountService.deleteAccount(accno);
+    deleteAccount(accno);
     closeDeleteMenu();
   }
-  // const accountEditForm = (
-  //   <>
-  //     <Stack spacing={3}>
-  //       <TextField name="accountName" label="Account Name" />
-  //       <TextField name="aStreet" label="Street" />
-  //       <TextField name="aCity" label="City" />
-  //       <TextField name="aStatus" label="Status" />
-  //       <TextField name="accountType" label="Account Type" />
 
-  //     </Stack>
-
-  //     <Grid container justifyContent="flex-end"  sx={{ my: 3 }}>
-  //       <Grid item xs={6}>
-  //         <TextField name="astate" label="State"/>
-  //       </Grid>
-  //       <Grid item xs={6}>
-  //         <TextField name="azipcode" label="Zip Code"/>
-  //       </Grid>
-  //     </Grid>
-
-  //     <Button
-  //       fullWidth
-  //       size="large"
-  //       type="submit"
-  //       variant="contained"
-  //       color="inherit"
-  //       // onClick={() => editAccount()}
-  //     >
-  //       Confirm
-  //     </Button>
-  //   </>
-  // );
-
-  const isAuthorized = () => {
-    // TODO: get user role
-    if (edit) {
-      return visuallyHidden
-    }
-    return 'none'
-  };
-
-  const [editForm, setEditForm] = useState({ acctype: '', acct_name: '', astreet: '', acity: '', astate: '', azipcode: ''});
+  const [editForm, setEditForm] = useState({ acctype: '', acct_name: accName, astreet: street, acity: city, astate: state, azipcode: zipcode, acc_no: accNo});
   
   const handleChange = (e) => {
     const {name, value} = e.target;
@@ -123,7 +129,8 @@ export default function AccountsTableRow({
     const sanitizedEditForm=DOMPurify.sanitize(editForm);
     console.log(sanitizedEditForm);
     // TODO: call API to update account
-    accountService.updateAccountDetails(sanitizedEditForm);
+    const data = editAccount(sanitizedEditForm);
+    console.log(data);
     closeEditMenu();
   }
 
@@ -149,7 +156,7 @@ export default function AccountsTableRow({
 
         <TableCell>{accName}</TableCell>
 
-        <TableCell>{address}</TableCell>
+        <TableCell>{`${street}, ${city} ${state} ${zipcode}`}</TableCell>
 
         <TableCell>{dateOpened}</TableCell>
 
@@ -285,8 +292,12 @@ AccountsTableRow.propTypes = {
   accNo: PropTypes.any,
   accName: PropTypes.any,
   handleClick: PropTypes.func,
-  address: PropTypes.any,
+  street: PropTypes.any,
+  city: PropTypes.any,
+  state: PropTypes.any,
+  zipcode: PropTypes.any,
   dateOpened: PropTypes.any,
   selected: PropTypes.any,
   status: PropTypes.string,
+  isAuthorized: PropTypes.func,
 };
